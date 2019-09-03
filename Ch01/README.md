@@ -459,7 +459,7 @@ plot(功能 ~ 教育, data = dta, horizontal = T)
 grid()
 ```
 
-<img src="unnamed-chunk-38-1.png" style="display: block; margin: auto;" />
+<img src="ch01_files/figure-gfm/unnamed-chunk-38-1.png" style="display: block; margin: auto;" />
 
 ``` r
 #載入 lattice，準備畫圖
@@ -486,7 +486,7 @@ library(gridExtra)
 grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2, ncol = 2)
 ```
 
-<img src="unnamed-chunk-42-1.png" style="display: block; margin: auto;" />
+<img src="ch01_files/figure-gfm/unnamed-chunk-42-1.png" style="display: block; margin: auto;" />
 
 繪製不同年齡生理健康的平均數
 
@@ -525,7 +525,7 @@ ggplot(data = dta, aes(x = 年齡, y = 功能, color = 性別) ) +
  theme(legend.justification = c(1, 0), legend.position = c(1, 0))
 ```
 
-<img src="unnamed-chunk-45-1.png" style="display: block; margin: auto;" />
+<img src="ch01_files/figure-gfm/unnamed-chunk-45-1.png" style="display: block; margin: auto;" />
 
 ### 示範資料重新結構
 
@@ -571,7 +571,7 @@ p <- ggplot(data = dtal, aes(x = 年齡, y = 分數,
 print(p)
 ```
 
-<img src="unnamed-chunk-48-1.png" style="display: block; margin: auto;" />
+<img src="ch01_files/figure-gfm/unnamed-chunk-48-1.png" style="display: block; margin: auto;" />
 
 不同性別在功能上平均數檢定（兩種寫法）
 
