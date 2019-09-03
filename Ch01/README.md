@@ -414,7 +414,7 @@ names(hlth)[1:2] <- c('性別', '年齡')
 with(hlth, dotchart(t(功能), group = 性別, labels = 年齡, xlab = '功能'))
 ```
 
-<img src="unnamed-chunk-35-1.png" style="display: block; margin: auto;" />
+<img src="ch01_files/figure-gfm/unnamed-chunk-35-1.png" style="display: block; margin: auto;" />
 
 依移動排序，可以看到男性移動困難退化的較慢
 
