@@ -1,0 +1,451 @@
+---
+title: "R在行為科學之應用:第一章"
+author: "鄭中平、許清芳"
+date: "`r format(Sys.time(), '%Y %B %d')`"
+output:
+        html_document: 
+        theme: lumen
+highlight: kate
+word_document: default
+pdf_document:
+        includes:
+        in_header: header.tex
+keep_tex: yes   
+latex_engine: xelatex
+---
+   
+```{r, setup, include=FALSE}
+# set up options for formatting output
+knitr::opts_chunk$set(
+  tidy = FALSE,     # display code as typed
+  size = "small",
+  fig.width = 12, 
+  fig.height = 8,
+  fig.align = 'center',
+  comment = "")   # slightly smaller font for code
+```
+
+   
+```{r, message=FALSE, warning=FALSE}
+#我在哪裡? - current working directory
+getwd()
+```
+
+
+### 讀取檔案、提取資料與製造變項
+
+資料來自於 NHIS 2010 調查,取 1955 年以前出生者（55歲以上）
+視力困難、聽力困難、移動困難與溝通困難變項，分數越高越有困難
+
+資料檔名: Quality_of_Life.txt
+
+這是一般 TXT 檔，檔頭有變項名稱
+
+
+```{r}
+#檔案地址
+fLoc <- "http://myweb.ncku.edu.tw/~cpcheng/Rbook/01/data/Quality_of_Life.txt"
+```
+
+
+```{r}
+# 讀取檔案
+dta <- read.table(file = fLoc, header = TRUE)
+```
+
+### 資料類型
+
+```{r}
+#dta 的類型是資料框架（data frame）
+class(dta)
+```   
+  
+看看dta維度: 多少行、多少行列(變項).
+  
+```{r}
+dim(dta)
+```
+
+
+```{r}
+#利用names看看變項名稱
+names(dta)
+```
+
+
+看前六筆
+
+```{r}
+#程式報表1.1
+head(dta)
+```
+
+
+```{r}
+#看看第一列第一欄對應資料
+dta[1, 1]
+```
+
+這是類別資料
+
+```{r}
+#看看第九列，這是資料框架
+class(dta[9, ])
+```
+
+```{r}
+#看看第一欄，這「不是」資料框架，是類別
+class(dta[,1])
+```
+
+```{r}
+#前者是類別變項，後者是資料框架
+class(dta[,'教育'])
+class(dta['教育'])
+```
+
+```{r}
+#還是資料框架
+class(dta[5:7, c('視力', '聽力')])
+```
+
+檢視資料結構
+
+```{r}
+#程式報表1.2
+str(dta)
+```
+
+看看類別變項的屬性
+
+```{r}
+#這是五個水準類別變項
+attributes(dta[, '教育'])
+```
+
+用table指令檢視類別變項分佈
+
+```{r}
+#程式報表1.3
+table(dta[, '教育'])
+```
+
+將類別變項轉成數值變項，再利用table
+
+```{r}
+#程式報表1.3
+table(as.numeric(dta[, '教育']))
+```
+
+
+### 指令作用結果視作用物件而定
+
+指令summary是常用指令，可以用在不同物件上
+
+這是用在資料框架上
+
+```{r}
+#程式報表1.4
+summary(dta['教育'])
+```
+
+這是用在類別變項上
+
+```{r}
+#程式報表1.4
+summary(dta[, '教育'])
+```
+
+
+```{r}
+#第一個是數值，第二個是資料框架
+class(dta[, '視力'])
+class(dta['視力'])
+```
+
+
+```{r}
+#指令t用來轉置矩陣，資料框架被轉成矩陣了
+class(t(dta['視力']))
+```
+
+兩種寫法製造平均數
+
+```{r}
+#很直覺，不過如果有遺漏值就麻煩了
+dta$功能 <- (dta$視力 + dta$聽力 + dta$移動 + dta$溝通)/4;
+head(dta$功能)
+```
+   
+   
+```{r} 
+#有遺漏值會警告我們
+tail(dta$功能 <- rowMeans(dta[, 4:7]))
+```
+
+
+### 基本統計量（示範應用函數）
+
+看看資料基本統計
+
+```{r}
+#程式報表1.5
+summary(dta)
+```
+
+計算健康情形標準差
+
+```{r}
+sd(dta$功能)
+```
+
+```{r}
+#利用 with 會讓指令比較好寫好讀
+with(dta, sd(功能))
+```
+
+### 安裝套件 ，載入套件
+
+注意，安裝只需要一次，但載入則是每次
+
+```{r, message=FALSE}
+#先安裝再載入套件 
+install.packages("moments", repos='https://cran.rstudio.com/')
+#
+library(moments)
+```
+
+計算偏態
+
+```{r}
+with(dta, skewness(功能))
+```
+
+### 矢量化運算
+
+一次計算所有平均數
+
+```{r}
+#一次計算所有平均數
+sapply(dta[, -c(1:3)], mean)
+```
+
+Conditional means
+
+```{r}
+aggregate(cbind(視力, 聽力, 移動, 溝通) ~ 教育, data = dta, mean)
+```
+
+### 定義一個函數
+
+可以同時算出平均數、標準差、偏態與峰度
+
+一次計算多個變項平均數、標準差、偏態與峰度
+
+```{r}
+#程式報表1.6
+my_summary <- function(x) {
+ require(moments)
+ funs <- c(mean, sd, skewness, kurtosis)
+ sapply(funs, function(f) f(x, na.rm = TRUE))
+}
+sapply(dta[, c(4:8)], my_summary)
+```
+
+計算不同教育程度健康功能標準差（兩種寫法）
+
+```{r}
+tapply(dta$功能, dta$年齡, sd)
+```
+
+
+```{r}
+with(dta, tapply(功能, 年齡, sd))
+```
+
+把不同性別、教育者平均數算出來（兩種寫法）
+
+第二種寫法把輸出放到 hlth 物件了，沒有輸出到螢幕
+
+```{r}
+#程式報表1.7
+with(dta, aggregate(dta[, 4:8], by = list(性別, 年齡), FUN = mean))
+hlth <- aggregate(cbind(視力, 聽力, 移動, 溝通, 功能) ~ 性別 + 年齡, 
+                       data = dta, mean)
+                       
+```
+
+
+```{r}
+#命名 hlth 的前兩欄
+names(hlth)[1:2] <- c('性別', '年齡')
+```
+
+不同性別與年齡的健康功能圖
+
+```{r}
+#圖1.1
+with(hlth, dotchart(t(功能), group = 性別, labels = 年齡, xlab = '功能'))
+```
+
+依移動排序，可以看到男性移動困難退化的較慢
+
+```{r}
+#程式報表1.8
+hlth[order(hlth$移動), c(1:2, 5)]
+```
+
+
+### 繪圖顯示
+
+```{r}
+#先將教育程度水準重排
+dta$教育 <- factor(dta$教育, levels = c('小學', '初中', '高中', '專科', '大學'))
+```
+
+不同教育水準健康功能盒鬚圖
+
+把資料改成水平，更容易比較
+
+這是直接針對原始資料，而非統計量畫圖
+
+```{r}
+#圖1.2
+plot(功能 ~ 教育, data = dta, horizontal = T)
+#加上格線，有助比較
+grid()
+```
+
+
+```{r}
+#載入 lattice，準備畫圖
+library(lattice)
+```
+
+```{r}
+#取出四個要畫圖的變項
+v4 <- dta[, 4:7]
+```
+
+```{r}
+#把變項年齡與性別上的直方圖記下來
+p <- lapply(names(v4), function(x) histogram( ~ v4[x] | 年齡 + 性別, data = dta,
+            xlab = x )) 
+                            
+```
+
+利用 gridExtra 排一下四張圖
+
+
+```{r}
+#圖1.3
+#install.packages("gridExtra",  repos='https://cran.rstudio.com/')
+library(gridExtra)
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2, ncol = 2)
+```
+
+
+繪製不同年齡生理健康的平均數
+
+加上利用拔靴法得到的平均數信賴區間
+
+```{r}
+# 先檢查再安裝
+# 載進 ggplot2 in tidyverse，準備畫圖
+# Hmisc提供額外功能
+if (!require(pacman)) install.packages("pacman")
+# 載入套件
+pacman::p_load(tidyverse, Hmisc, here)
+```
+
+
+```{r}
+#調整圖形，避免重疊
+pd <- position_dodge(width = .3)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+#圖1.4
+ggplot(data = dta, aes(x = 年齡, y = 功能, color = 性別) ) +
+ stat_summary(fun.data = 'mean_cl_boot', position = pd) +
+ facet_grid(教育 ~ . ) +
+ labs(x = '年齡', y = '功能分數') +
+ coord_cartesian(ylim = range(dta['功能'])) +
+ coord_flip() +
+ scale_color_manual(values = c('black', 'gray'), 
+                    guide = guide_legend(title = '性別', reverse = TRUE)) +
+ theme_bw() +
+ theme(legend.justification = c(1, 0), legend.position = c(1, 0))
+```
+ 
+ 
+### 示範資料重新結構
+
+把資料由寬形變長形
+
+```{r}
+dtal <- gather(dta, key = '功能項目', value = '分數', 4:7)
+```
+
+看看資料
+
+```{r}
+#程式報表1.9
+head(dtal)
+```
+
+不同年齡性別各功能項目平均數
+
+```{r}
+#圖1.5
+p <- ggplot(data = dtal, aes(x = 年齡, y = 分數, 
+       shape = reorder(功能項目, 分數, mean),  group = reorder(功能項目, 分數))) +
+ stat_summary(fun.data = mean_se, geom = 'errorbar', position = pd) +
+ stat_summary(fun.y = mean, geom = 'point', position = pd, size = 3) +
+ stat_summary(fun.y = mean, geom = 'line', position = pd, linetype = 'dotted') +
+ facet_grid( . ~  性別) +
+ labs(x = '年齡', y = '分數') +
+ scale_shape_manual(values = c(2, 8, 1, 6), 
+                    guide = guide_legend(title = '功能項目', reverse = TRUE)) +
+ theme_bw() +
+ theme(legend.justification = c(0, 1), legend.position = c(0, 1))
+#
+print(p)
+```
+
+不同性別在功能上平均數檢定（兩種寫法）
+
+```{r}
+#程式報表1.10
+t.test(功能 ~ 性別, data = dta)
+with(dta, t.test(功能 ~ 性別))
+```          
+
+One-way analysis of variance
+
+```{r}
+anova(lm(功能 ~ 教育, data = dta))
+```
+
+### 存檔, 存圖
+
+```{r, warning=FALSE, message=FALSE}
+dir.create("ch01")
+dir.create(here("ch01", "data"))
+write.csv(dta, here("ch01", "data", "quality_of_life.csv"), quote = FALSE, row.names = FALSE)
+```
+
+```{r, warning=FALSE,message=FALSE}
+dir.create(here("ch01", "figs"))
+ggsave(plot = p, here("ch01", "figs", "Fig1_5.png"), device = "png")
+```
+
+
+### 結束
+
+顯示演練單元信息   
+
+```{r}
+sessionInfo()
+```
