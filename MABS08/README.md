@@ -3,10 +3,10 @@
  **Analysis of Longitudinal Data I: Graphical Displays and Summary
 Measure Approach**
 ================
-Kimmo Vehkalahti, Brian S. Everitt, edited by C.-F. Sheu
+Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 06 September, 2019
 
-## Example
+## Example: The brief psychiatric rating scale
 
 Here 40 male subjects were randomly assigned to one of two treatment
 groups and each subject was rated on the brief psychiatric rating scale
