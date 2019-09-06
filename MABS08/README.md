@@ -24,7 +24,6 @@ having schizophrenia.
 # if not install it and then
 # load the data management and graphics package
 if (!require(pacman)) install.packages("pacman")
-# 載入套件
 pacman::p_load(tidyverse, devtools)
 ```
 
