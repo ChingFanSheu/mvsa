@@ -187,7 +187,7 @@ ggplot(BPRSL, aes(x = week, y = stdbprs, linetype = subject)) +
   scale_y_continuous(name = "Standardized BPRS score")
 ```
 
-<img src="MABS08/BPRS_files/figure-gfm/fig8.2-1.png" style="display: block; margin: auto;" />
+<img src="BPRS_files/figure-gfm/fig8.2-1.png" style="display: block; margin: auto;" />
 
 ## Figure 8.3
 
