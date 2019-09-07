@@ -160,7 +160,7 @@ ggplot(BtBL0, aes(x = factor(Visit), y = BDI, fill = Treatment)) +
   labs(y = "Beck Depression Inventory II score")
 ```
 
-<img src="Chapter-09-examples2_files/figure-gfm/fig9.5-1.png" style="display: block; margin: auto;" />
+<img src="BtheB_files/figure-gfm/fig9.5-1.png" style="display: block; margin: auto;" />
 
 ## Figure 9.6
 
@@ -168,7 +168,7 @@ ggplot(BtBL0, aes(x = factor(Visit), y = BDI, fill = Treatment)) +
 pairs(BtB[, -c(1:4)], cex = 0.8, cex.labels = 1.0)
 ```
 
-<img src="Chapter-09-examples2_files/figure-gfm/fig9.6-1.png" style="display: block; margin: auto;" />
+<img src="BtheB_files/figure-gfm/fig9.6-1.png" style="display: block; margin: auto;" />
 
 ## Table 9.8
 
