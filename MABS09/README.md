@@ -8,4 +8,4 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 07 September, 2019
 
 - [Example: Rat weight](Rat_weight.md)
-- [Labor pain](Pain.md)
+- [Example: Beat the Blues](BtheB.md)
