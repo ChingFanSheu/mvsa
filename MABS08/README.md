@@ -1,4 +1,5 @@
-*Multivariate Analysis for the Behavioral Sciences, *
+
+**Multivariate Analysis for the Behavioral Sciences,**
 **Chapter 8:**
 **Analysis of Longitudinal Data I: Graphical Displays and Summary
 Measure Approach**
