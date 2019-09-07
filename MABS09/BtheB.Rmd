@@ -1,0 +1,172 @@
+---
+title:  |  
+  |  *Multivariate Analysis for the Behavioral Sciences,*
+  |  **Examples of Chapter 9:**
+  |  **Analysis of Longitudinal Data II: Linear Mixed Effects Models for Normal Response Variables**
+author: |
+  | "Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu"
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    latex_engine: xelatex
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+\pagebreak 
+
+## Example: "Beat the Blues (BtB)" 
+
+Longitudinal data from a clinical trial of an interactive, multimedia program known as "Beat the Blues" designed to deliver cognitive behavioral therapy to depressed patients via a computer terminal. Patients with depression recruited in primary care were randomised to either the Beating the Blues program, or to "Treatment as Usual (TAU)". 
+
+A number of outcome measures were used in the trial, but here we concentrate
+on the Beck Depression Inventory II (BDI; Beck et al., 1996). Measurements
+on this variable were made on the following five occasions:
+
+- Prior to treatment,
+
+- 2, 4, 6, and 8 months after treatment began.
+
+Two additional explanatory variables are also available for each patient: the first, drug, is whether the
+patient was taking antidepressant drugs (yes or no), and the second, length,
+is the length of the current episode of depression categorized into less than
+six months (<6m) or more than six months (>6m). The NAs (not available)
+in Table 9.7 indicate where a protocol-specified measurement of the BDI was 
+not made; here, all the NAs are due to patients dropping out of the study.
+How dropouts might affect the results obtained from the analysis of the data
+will be discussed later in the chapter. The main question of interest here is to
+estimate the treatment effect of the BtB program.
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, lme4)
+```
+
+
+## Table 9.7: Patients in Each Treatment Group of the "Beat the Blues" Clinical Trial of CBT for Depression
+
+```{r}
+# file location
+fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BtB.txt"
+```
+
+```{r}
+# data input
+BtB <- read.table(fLoc, header = TRUE, sep = '\t')
+```
+
+```{r}
+# to make sure that the factor levels are logical (esp. Treatment):
+BtB <- within(BtB, {
+  Drug <- factor(Drug, levels = c("No", "Yes")) # default
+  Length <- factor(Length, levels = c("<6m", ">6m")) # default
+  Treatment <- factor(Treatment, levels = c("TAU", "BtheB")) # NOT default!
+})
+```
+
+```{r}
+glimpse(BtB); head(BtB); tail(BtB)
+```
+
+Note that the data are stored in the wide form, i.e., repeated measurments are represented by additional columns in the data frame.
+
+\pagebreak
+
+## Figure 9.5
+
+```{r}
+# Convert data to long form, including the baseline BDI measurement:
+BtBL0 <- gather(BtB, key = Visit, value = BDI, BDIpre, BDI2m, BDI4m, BDI6m, BDI8m)
+```
+
+```{r}
+glimpse(BtBL0); head(BtBL0); tail(BtBL0)
+```
+```{r}
+# set black and white theme
+ot <- theme_set(theme_bw())
+```
+
+```{r fig9.5, warning=FALSE,message=FALSE}
+ggplot(BtBL0, aes(x = factor(Visit), y = BDI, fill = Treatment)) +
+  geom_boxplot() + 
+  facet_grid(Treatment ~., labeller = label_parsed) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) + 
+  theme(legend.position = "none") + 
+  # BDIpre first!
+  scale_x_discrete(name = "", 
+                   limits = c("BDIpre", "BDI2m", "BDI4m", "BDI6m", "BDI8m")) + 
+  scale_fill_grey(start = 1, end = 1) +
+  labs(y = "Beck Depression Inventory II score")
+```
+
+\pagebreak
+
+## Figure 9.6
+
+```{r fig9.6, fig.width=10, fig.height=10}
+pairs(BtB[, -c(1:4)], cex = 0.8, cex.labels = 1.0)
+```
+\pagebreak
+
+## Table 9.8
+
+```{r}
+# Convert data to long form for the analyses, adding Time:
+BtBL <- gather(BtB, key = Visit, value = BDI, BDI2m, BDI4m, BDI6m, BDI8m) %>%
+  mutate(Time = as.integer(substr(Visit, 4, 4))) 
+```
+
+```{r}
+glimpse(BtBL); head(BtBL); tail(BtBL)
+```
+
+```{r}
+BtB_fit0 <- lm(BDI ~ BDIpre + Time + Treatment + Drug + Length, data = BtBL, na.action = na.omit)
+summary(BtB_fit0)
+```
+
+\pagebreak
+
+## Table 9.9
+
+```{r}
+BtB_fit1 <- lme4::lmer(BDI ~ BDIpre + Time + Treatment + Drug + Length + (1 | Subject), 
+                 data = BtBL, na.action = na.omit)
+summary(BtB_fit1)
+```
+
+\pagebreak
+
+```{r}
+BtB_fit2 <- lme4::lmer(BDI ~ BDIpre + Time + Treatment + Drug + Length + (Time | Subject), 
+                 data = BtBL, na.action = na.omit)
+summary(BtB_fit2)
+```
+
+```{r}
+anova(BtB_fit2, BtB_fit1)
+```
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+devtools::session_info()
+```
