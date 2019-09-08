@@ -183,6 +183,34 @@ epil_glmm <- lme4::glmer(fmla6, data = EPIL, family = "poisson")
 summary(epil_glmm)
 ```
 
+```{r}
+# center the variable week and standardize the variable age
+EPIL <- mutate(EPIL, 
+               week_c = as.numeric(scale(week, scale = FALSE)), 
+               age_s = as.numeric(scale(age))) 
+```
+
+```{r}
+xnam <- c(names(EPIL)[c(1,9,10)], "log(base2)")
+(fmla5 <- as.formula(paste("seizure.rate ~ ", paste(xnam, collapse= "+"))))
+```
+
+```{r}
+# set up the model formula for lme4
+(fmla6 <- as.formula(paste("seizure.rate ~ ", 
+                           paste0(paste(xnam, collapse = "+"), 
+                                  " + (1 | subject)"))))
+
+```
+
+```{r}
+epil_glmm <- lme4::glmer(fmla6, data = EPIL, family = "poisson")
+```
+
+```{r}
+summary(epil_glmm)
+```
+
 \pagebreak
 
 ## Table 10.12
