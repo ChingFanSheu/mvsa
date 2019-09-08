@@ -1,0 +1,179 @@
+---
+title:  |  
+  | *Multivariate Analysis for the Behavioral Sciences,*
+  | **Examples of Chapter 10:**
+  | **Analysis of Longitudinal Data III: Non-Normal Responses**
+author: |
+  | "Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu"
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, geepack)
+```
+
+\pagebreak
+
+## Example: Beat the Blues Revisited
+
+Longitudinal data from a clinical trial of an interactive, multimedia program known as "Beat the Blues" designed to deliver cognitive behavioral therapy to depressed patients via a computer terminal. Patients with depression recruited in primary care were randomised to either the Beating the Blues program, or to "Treatment as Usual (TAU)". 
+
+A number of outcome measures were used in the trial, but here we concentrate
+on the Beck Depression Inventory II (BDI; Beck et al., 1996). Measurements
+on this variable were made on the following five occasions:
+
+- Prior to treatment,
+
+- 2, 4, 6, and 8 months after treatment began.
+
+Two additional explanatory variables are also available for each patient: the first, drug, is whether the
+patient was taking antidepressant drugs (yes or no), and the second, length,
+is the length of the current episode of depression categorized into less than
+six months (<6m) or more than six months (>6m). The NAs (not available)
+in Table 9.7 indicate where a protocol-specified measurement of the BDI was 
+not made; here, all the NAs are due to patients dropping out of the study.
+How dropouts might affect the results obtained from the analysis of the data
+will be discussed later in the chapter. The main question of interest here is to
+estimate the treatment effect of the BtB program.
+
+```{r}
+# file location
+fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BtB.txt"
+```
+
+```{r}
+# data input
+BtB <- read.table(fLoc, header = TRUE, sep = '\t')
+```
+
+```{r}
+# to make sure that the factor levels are logical (esp. Treatment):
+BtB <- within(BtB, {
+  Drug <- factor(Drug, levels = c("No", "Yes")) # default
+  Length <- factor(Length, levels = c("<6m", ">6m")) # default
+  Treatment <- factor(Treatment, levels = c("TAU", "BtheB")) # NOT default!
+})
+```
+
+```{r}
+glimpse(BtB); head(BtB); tail(BtB)
+```
+
+
+```{r}
+# Convert data to long form for the analyses, adding Time:
+# important to order the data with respect to the subjects:
+BtBL <- gather(BtB, key = Visit, value = BDI, BDI2m, BDI4m, BDI6m, BDI8m) %>%
+  mutate(Time = as.integer(substr(Visit, 4, 4))) %>%
+  arrange(Subject)
+```
+
+\pagebreak
+
+
+## Table 10.3
+
+
+```{r, echo=TRUE}
+# independence correlation structure
+BtB_gee1 <- geepack::geeglm(BDI ~ BDIpre + Time + Treatment + Drug + Length,
+                     id = Subject, 
+                     data = BtBL, 
+                     family = gaussian, 
+                     corstr = "independence", std.err="san.se")
+```
+
+```{r}
+summary(BtB_gee1)
+```
+
+\pagebreak
+
+## Table 10.4
+
+```{r}
+# exchangeable correlation structure
+BtB_gee2 <- geepack::geeglm(BDI ~ BDIpre + Time + Treatment + Drug + Length,
+                     id = Subject, 
+                     data = BtBL, 
+                     family = gaussian, 
+                     corstr = "exchangeable", std.err="san.se")
+```
+
+```{r}
+summary(BtB_gee2)
+```
+
+## Auto-regressive lag-one correlation structure
+
+Not shown in the textbook
+
+```{r}
+BtB_gee3 <- geepack::geeglm(BDI ~ BDIpre + Time + Treatment + Drug + Length,
+                     id = Subject, 
+                     data = BtBL, 
+                     family = gaussian, 
+                     corstr = "ar1", std.err="san.se")
+```
+
+```{r}
+summary(BtB_gee3)
+```
+
+## Unstructured correlation structure
+
+Not shown in the textbook
+
+```{r}
+BtB_gee4 <- geepack::geeglm(BDI ~ BDIpre + Time + Treatment + Drug + Length,
+                     id = Subject, 
+                     data = BtBL, 
+                     family = gaussian, 
+                     corstr = "unstructured", std.err="san.se")
+```
+
+```{r}
+summary(BtB_gee4)
+```
+
+
+\pagebreak
+
+## References
+
+Højsgaard, S. Halekoh, U., & Yan, J. (2006).
+[The R Package geepack for Generalized Estimating Equations](https://www.jstatsoft.org/article/view/v015i02)
+*Journal of Statistical Software*,
+15(2), 1-11.
+
+Sheu, C.-F. (2000). [Regression analysis of correlated binary outcomes.](https://link.springer.com/content/pdf/10.3758/BF03207794.pdf)
+*Behavior Research Methods, Instruments, & Computers*, 
+32(2), 269-273.
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
+
