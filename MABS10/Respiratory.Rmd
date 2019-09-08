@@ -1,0 +1,223 @@
+---
+title:  |  
+  | *Multivariate Analysis for the Behavioral Sciences,*
+  | **Examples of Chapter 10:**
+  | **Analysis of Longitudinal Data III: Non-Normal Responses**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+date: |
+  | '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, gee, lme4, HSAUR3)
+```
+
+## Example: Respiratory Illness
+
+The respiratory status of patients recruited for a randomised clinical multicenter trial.
+In each of two centres, eligible patients were randomly assigned to active treatment or placebo. During the treatment, the respiratory status (categorised poor or good) was determined at each of four, monthly visits. The trial recruited 111 participants (54 in the active group, 57 in the placebo group) and there were no missing data for either the responses or the covariates. The question of interest is to assess whether the treatment is effective and to estimate its effect.
+
+\pagebreak
+
+## Table 10.1: Respiratory Disorder Data
+
+```{r}
+# load the data set
+data("respiratory", package = "HSAUR3")
+```
+
+```{r}
+# view data help file
+?HSAUR3::respiratory
+```
+
+```{r}
+# make a copy of the data set
+RESPL <- respiratory # (data are in long form)
+```
+
+```{r}
+glimpse(RESPL); head(RESPL)
+```
+
+```{r}
+# recode variable levels
+# see the original article by Davis (1991)
+RESPL <- within(RESPL, {
+     levels(gender) <- c("male", "female") 
+     # for converting to wide form below
+     status <- as.numeric(status) - 1 
+})
+```
+
+
+```{r}
+# convert data to WIDE form:
+# (sep: set valid names month0:month4 here; otherwise just 0:4)
+RESP <- RESPL %>% 
+  spread(key = month, value = status, sep = "") %>% 
+  arrange(subject)
+```
+
+```{r}
+glimpse(RESP); head(RESP)
+```
+
+```{r}
+# back to long form; leave month0 for baseline:
+RESPL <- gather(RESP, key = months, value = status, month1:month4) %>%
+  mutate(month = as.integer(substr(months, 6, 6))) %>% 
+  rename(baseline = month0) %>% 
+  arrange(subject)
+```
+
+```{r}
+glimpse(RESPL); head(RESPL)
+```
+
+\pagebreak
+
+## Figure 10.2
+
+```{r}
+# compute proportions by treatment for each month
+n = dim(RESP)[1]
+RP <- RESP %>%
+  group_by(treatment) %>%
+  summarize(m0 = 100*sum(month0)/n, 
+            m1 = 100*sum(month1)/n, 
+            m2 = 100*sum(month2)/n, 
+            m3 = 100*sum(month3)/n, 
+            m4 = 100*sum(month4)/n ) %>%
+  select(-treatment) %>%
+  ungroup()
+```
+
+```{r}
+knitr::kable(RP)
+```
+
+```{r}
+RP2 <- cbind(RP[1, ], RP[2, ])
+month <- rep(1:5, times = 2)
+treatment <- rep(0:1, each = 5)
+RPos <- as.data.frame(cbind(treatment, month, t(RP2)))
+row.names(RPos) <- 1:10
+names(RPos) <- c("Treatment", "Month", "Positive")
+RPos$Treatment <- factor(RPos$Treatment, 
+                         labels = c("Placebo", "Treatment"))
+```
+
+```{r}
+knitr::kable(RPos)
+```
+
+```{r fig10.2}
+ggplot(RPos, aes(x = Month, y = Positive, fill = Treatment)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  scale_x_continuous(name = "", breaks = 1:5,
+                     labels = c("Baseline", "Month 1", "Month 2", "Month 3", "Month 4")) + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + 
+  scale_y_continuous(name = "Positive responses (%)") +
+  scale_fill_grey(start = 0.6, end = 0.2)
+```
+
+\pagebreak
+
+## Table 10.5
+
+```{r}
+resp_gee1 <- gee::gee(status ~ age, data = RESPL, 
+                      family = binomial, 
+                      id = subject, 
+                      corstr = "independence", 
+                      scale.fix = TRUE, scale.value = 1)
+```
+
+```{r}
+summary(resp_gee1)
+```
+
+\pagebreak
+
+## Table 10.6
+
+```{r}
+resp_gee2 <- gee(status ~ age, data = RESPL, 
+                 family = binomial, id = subject,
+                 corstr = "exchangeable", 
+                 scale.fix = TRUE, scale.value = 1)
+```
+
+```{r}
+summary(resp_gee2)
+```
+
+\pagebreak
+
+## Table 10.7
+
+```{r}
+xnam <- names(RESPL)[c(1:4,6,9)]
+(fmla3 <- as.formula(paste("status ~ ", paste(xnam, collapse= "+"))))
+```
+
+```{r}
+resp_gee3 <- gee(fmla3, data = RESPL, 
+                 family = binomial, id = subject, 
+                 corstr = "exchangeable", 
+                 scale.fix = TRUE, scale.value = 1)
+```
+
+```{r}
+summary(resp_gee3)
+```
+
+\pagebreak
+
+## Table 10.10
+
+```{r}
+# set up the model formula for lme4
+(fmla4 <- as.formula(paste("status ~ ", 
+                           paste0(paste(xnam, collapse = "+"), 
+                                  " + (1 | subject)"))))
+
+```
+
+```{r}
+resp_glmer <- lme4::glmer(fmla4, data = RESPL, family = binomial)
+```
+
+```{r}
+summary(resp_glmer)
+```
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
