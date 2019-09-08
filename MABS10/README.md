@@ -8,4 +8,4 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 
 - [Example: Beat the Blues Revisited](BtB.md)
 - [Example: Respiratory Illness](Respiratory.md)
-- [Example: Rat weight](Rat_weight.md)
+- [Example: Epilepsy](Epilepsy.md)
