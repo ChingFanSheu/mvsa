@@ -338,6 +338,72 @@ summary(epil_glmm)
     convergence code: 0
     Model failed to converge with max|grad| = 0.00241627 (tol = 0.001, component 1)
 
+``` r
+# center the variable week and standardize the variable age
+EPIL <- mutate(EPIL, 
+               week_c = as.numeric(scale(week, scale = FALSE)), 
+               age_s = as.numeric(scale(age))) 
+```
+
+``` r
+xnam <- c(names(EPIL)[c(1,9,10)], "log(base2)")
+(fmla5 <- as.formula(paste("seizure.rate ~ ", paste(xnam, collapse= "+"))))
+```
+
+    seizure.rate ~ treatment + week_c + age_s + log(base2)
+
+``` r
+# set up the model formula for lme4
+(fmla6 <- as.formula(paste("seizure.rate ~ ", 
+                           paste0(paste(xnam, collapse = "+"), 
+                                  " + (1 | subject)"))))
+```
+
+    seizure.rate ~ treatment + week_c + age_s + log(base2) + (1 | 
+        subject)
+
+``` r
+epil_glmm <- lme4::glmer(fmla6, data = EPIL, family = "poisson")
+```
+
+``` r
+summary(epil_glmm)
+```
+
+    Generalized linear mixed model fit by maximum likelihood (Laplace
+      Approximation) [glmerMod]
+     Family: poisson  ( log )
+    Formula: seizure.rate ~ treatment + week_c + age_s + log(base2) + (1 |  
+        subject)
+       Data: EPIL
+    
+         AIC      BIC   logLik deviance df.resid 
+      1346.2   1367.0   -667.1   1334.2      230 
+    
+    Scaled residuals: 
+       Min     1Q Median     3Q    Max 
+    -3.298 -0.876 -0.089  0.604  7.242 
+    
+    Random effects:
+     Groups  Name        Variance Std.Dev.
+     subject (Intercept) 0.268    0.518   
+    Number of obs: 236, groups:  subject, 59
+    
+    Fixed effects:
+                       Estimate Std. Error z value Pr(>|z|)
+    (Intercept)         -0.0181     0.2123   -0.09   0.9319
+    treatmentProgabide  -0.3200     0.1506   -2.12   0.0336
+    week_c              -0.0587     0.0202   -2.91   0.0036
+    age_s                0.0672     0.0762    0.88   0.3780
+    log(base2)           1.0253     0.1012   10.14   <2e-16
+    
+    Correlation of Fixed Effects:
+                (Intr) trtmnP week_c age_s 
+    trtmntPrgbd -0.323                     
+    week_c       0.007  0.000              
+    age_s       -0.178  0.110  0.000       
+    log(base2)  -0.863 -0.043  0.000  0.161
+
 ## Table 10.12
 
 ``` r
@@ -347,16 +413,12 @@ summary(epil_glmm)
                                   " + (1 + week | subject)"))))
 ```
 
-    seizure.rate ~ treatment + age + week + log(base2) + (1 + week | 
-        subject)
+    seizure.rate ~ treatment + week_c + age_s + log(base2) + (1 + 
+        week | subject)
 
 ``` r
 epil_glmm2 <- lme4::glmer(fmla7, data = EPIL, family = "poisson")
 ```
-
-    Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl =
-    control$checkConv, : Model failed to converge with max|grad| = 0.00339469
-    (tol = 0.001, component 1)
 
 ``` r
 summary(epil_glmm2)
@@ -365,8 +427,8 @@ summary(epil_glmm2)
     Generalized linear mixed model fit by maximum likelihood (Laplace
       Approximation) [glmerMod]
      Family: poisson  ( log )
-    Formula: seizure.rate ~ treatment + age + week + log(base2) + (1 + week |  
-        subject)
+    Formula: seizure.rate ~ treatment + week_c + age_s + log(base2) + (1 +  
+        week | subject)
        Data: EPIL
     
          AIC      BIC   logLik deviance df.resid 
@@ -384,19 +446,17 @@ summary(epil_glmm2)
     
     Fixed effects:
                        Estimate Std. Error z value Pr(>|z|)
-    (Intercept)         -0.1877     0.4435   -0.42    0.672
+    (Intercept)         -0.0323     0.2118   -0.15    0.879
     treatmentProgabide  -0.3167     0.1502   -2.11    0.035
-    age                  0.0100     0.0123    0.81    0.417
-    week                -0.0514     0.0326   -1.57    0.116
+    week_c              -0.0513     0.0326   -1.57    0.116
+    age_s                0.0627     0.0772    0.81    0.417
     log(base2)           1.0252     0.1009   10.17   <2e-16
     
     Correlation of Fixed Effects:
-                (Intr) trtmnP age    week  
-    trtmntPrgbd -0.243                     
-    age         -0.864  0.113              
-    week        -0.136 -0.004 -0.051       
-    log(base2)  -0.537 -0.042  0.162 -0.019
-    convergence code: 0
-    Model failed to converge with max|grad| = 0.00339469 (tol = 0.001, component 1)
+                (Intr) trtmnP week_c age_s 
+    trtmntPrgbd -0.324                     
+    week_c       0.016 -0.004              
+    age_s       -0.180  0.113 -0.051       
+    log(base2)  -0.863 -0.042 -0.019  0.162
 
 ## Session information
