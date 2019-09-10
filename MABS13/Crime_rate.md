@@ -9,7 +9,7 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 # check to see if the pacman package is there
 # if not install it and then use it manage packages
 if (!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, gridExtra)
+pacman::p_load(tidyverse, gridExtra, factoextra)
 ```
 
 ## Example: Crime Rates
@@ -75,11 +75,18 @@ summary(crime_pc, loadings = TRUE)
 ## Figure 13.5
 
 ``` r
-plot(1:7, crime_pc$sdev^2, type = "l", 
-     xlab = "Component Number", ylab = "Variance")
+screeplot(crime_pc, type = "l", npcs = 7, main = "Screeplot")
+abline(h = 1, col = "indianred", lty = 2)
+legend("topright", legend = "Eigenvalue = 1", bty = "n", 
+       col = "indianred", lty = 2, cex = 0.6)
 ```
 
 <img src="Crime_rate_files/figure-gfm/fig13.5-1.png" style="display: block; margin: auto;" />
+
+``` r
+#plot(1:7, crime_pc$sdev^2, type = "l", 
+#     xlab = "Component Number", ylab = "Variance")
+```
 
 ## Figure 13.6
 
@@ -314,7 +321,8 @@ CT  0.587 -0.28295 -0.6839 -0.506 -0.0475  0.216 -0.2944
 ```
 
 ``` r
-biplot(pca_crime, scale = 0, choice = 1:2)
+# biplot(pca_crime, scale = 0, choice = 1:2)
+fviz_pca(pca_crime)
 ```
 
 <img src="Crime_rate_files/figure-gfm/fig13.bp-1.png" style="display: block; margin: auto;" />
