@@ -1,0 +1,228 @@
+---
+title:  |  
+  | *Multivariate Analysis for the Behavioral Sciences,*
+  | **Examples of Chapter 13:**
+  | **Principal Components Analysis**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, gridExtra)
+```
+
+\pagebreak
+
+## Example: Crime Rates
+
+The Statistical Abstract of the USA (1988) gives rates of different types of
+crime per 100,000 residents of 50 states of the United States plus the District
+of Columbia for the year 1986.
+
+## Table 13.5: Crime Rates in the United States
+
+```{r}
+fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/crime.txt"
+crime <- read.table(file = fLoc, header = T, sep = '\t')
+glimpse(crime)
+```
+
+\pagebreak
+
+## Figure 13.4
+
+```{r fig13.4, fig.width=10, fig.height=10}
+pairs(crime)
+```
+
+\pagebreak
+
+## Table 13.6
+
+```{r}
+crime_pc <- princomp(crime, cor = TRUE)
+summary(crime_pc, loadings = TRUE)
+```
+
+\pagebreak
+
+## Figure 13.5
+
+```{r fig13.5}
+plot(1:7, crime_pc$sdev^2, type = "l", 
+     xlab = "Component Number", ylab = "Variance")
+```
+
+\pagebreak
+
+## Figure 13.6
+
+```{r fig13.6, fig.width=7, fig.height=7}
+xlim <- range(crime_pc$scores[, 1])
+plot(crime_pc$scores[, 1], crime_pc$scores[, 2], type = "n",
+     xlab = "First PC score", 
+     ylab = "Second PC score", xlim = xlim, ylim = xlim)
+grid()
+text(crime_pc$scores[, 1], crime_pc$scores[, 2], 
+     row.names(crime), cex = 0.9) 
+```
+
+\pagebreak
+
+## Table 13.7
+
+```{r}
+options(digits = 3)
+# use all pcas to get original correlation matrix
+lambda <- crime_pc$sdev^2
+Astar <- crime_pc$loadings[1:7, 1:7]
+R <- Astar %*% diag(lambda) %*% t(Astar)
+R
+```
+
+```{r}
+# predicted correlation matrix based on first two components
+lambda2 <- lambda[1:2]
+Astar2 <- Astar[,1:2]
+R2 <- Astar2 %*% diag(lambda2) %*% t(Astar2)
+R2
+```
+
+\pagebreak
+
+What follows is not available in the textbook.
+
+```{r}
+# compute variance of each variable
+apply(crime, 2, var)
+```
+
+```{r}
+# create new data frame with centered variables
+z_crime <- apply(crime, 2, scale)
+round(head(z_crime), 3)
+```
+
+```{r}
+# Calculate eigenvalues & eigenvectors
+crime.cov <- cov(z_crime)
+crime.eigen <- eigen(crime.cov)
+```
+
+```{r}
+# extract loadings, flip the sign
+# by default, eigenvectors in R point in the negative direction
+phi <- -crime.eigen$vectors[, 1:2]
+row.names(phi) <- names(crime)
+colnames(phi) <- c("PC1", "PC2")
+phi
+```
+
+
+```{r}
+# Calculate Principal Components scores
+PC1 <- as.matrix(z_crime) %*% phi[,1]
+PC2 <- as.matrix(z_crime) %*% phi[,2]
+
+# Create data frame with Principal Components scores
+PC <- data.frame(State = row.names(crime), PC1, PC2)
+head(PC)
+```
+
+```{r fig13.6a}
+# Plot Principal Components for each State
+ggplot(PC, aes(PC1, PC2)) + 
+  modelr::geom_ref_line(h = 0, col="aliceblue") +
+  modelr::geom_ref_line(v = 0, col="aliceblue") +
+  geom_text(aes(label = State), size = rel(2)) +
+  labs(x = "First Principal Component",
+       y ="Second Principal Component", 
+       title = "First Two Principal Components of Crime Data") +
+  theme_bw()
+```
+
+```{r}
+# proportion of variance explained
+PVE <- crime.eigen$values / sum(crime.eigen$values)
+round(PVE, 2)
+```
+
+```{r fig13.pve}
+# PVE (aka scree) plot
+PVEplot <- ggplot(data.frame(x=c(1:length(PVE)), y=PVE), aes(x,y)) + 
+  geom_line() + 
+  labs(x = "Principal Component", y = "PVE", title = "Scree Plot") +
+  ylim(0, 1) +
+  theme_bw()
+# Cumulative PVE plot
+cumPVE <- ggplot(data.frame(x=c(1:length(PVE)), y=cumsum(PVE)), aes(x,y)) + 
+  geom_line() + 
+  labs(x = "Principal Component", y = NULL, 
+       title = "Cumulative Scree Plot") +
+  ylim(0,1) +
+  theme_bw()
+# 1-row, 2-col, side by side arrangement 
+grid.arrange(PVEplot, cumPVE, ncol = 2)
+```
+
+```{r}
+pca_crime <- prcomp(crime, scale = TRUE)
+names(pca_crime)
+```
+
+```{r}
+# means
+pca_crime$center
+# standard deviations
+pca_crime$scale
+```
+
+```{r}
+# The rotation matrix provides the principal component loadings
+# flip the sign
+-pca_crime$rotation
+```
+
+```{r}
+pca_crime$x <- - pca_crime$x
+head(pca_crime$x)
+```
+
+```{r fig13.bp, fig.width=7, fig.height=7}
+biplot(pca_crime, scale = 0, choice = 1:2)
+```
+```{r}
+# variances
+(VE <- pca_crime$sdev^2)
+# proportions of variance explained
+VE/sum(VE)
+```
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
