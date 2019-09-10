@@ -1,4 +1,4 @@
-**Multivariate Analysis for the Behavioral Sciences,**
+**Multivariate Analysis for the Behavioral Sciences**
 
 **Chapter 13: Principal Componenets Analysis**
 
