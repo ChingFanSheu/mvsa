@@ -6,4 +6,4 @@
 
 - [Multivariate Analysis for the Behavioral Sciences: codes, datasets, examples, exercises, etc.](https://github.com/KimmoVehkalahti/MABS)
 
-- [An R R and S-PLUS Companion to Multivariate Analysis](https://www.york.ac.uk/depts/maths/data/everitt/welcome.htm)
+- [An R and S-PLUS Companion to Multivariate Analysis](https://www.york.ac.uk/depts/maths/data/everitt/welcome.htm)
