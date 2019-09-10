@@ -1,0 +1,120 @@
+---
+title:  |  
+  | *Multivariate Analysis for the Behavioral Sciences,*
+  | **Examples of Chapter 13:**
+  | **Principal Components Analysis**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse)
+```
+
+
+\pagebreak
+
+## Example: Blood Chemistry
+
+The data consist of eight blood chemistry variables measured on 72 patients in
+a clinical trial. 
+The correlation matrix of the data, together with the standard
+deviations of each of the eight variables, is available.
+
+## Table 13.1: Correlations of Blood Chemistry Variables and Their Standard Deviations
+
+```{r}
+# correlation matrix
+blood_corr <- matrix(c(1.000, 0.290, 0.202,-0.055,-0.105,-0.252,-0.229, 0.058,
+                0.290, 1.000, 0.415, 0.285,-0.376,-0.349,-0.164,-0.129,
+                0.202, 0.415, 1.000, 0.419,-0.521,-0.441,-0.145,-0.076,
+               -0.055, 0.285, 0.419, 1.000,-0.877,-0.076, 0.023,-0.131,
+               -0.105,-0.376,-0.521,-0.877, 1.000, 0.206, 0.034, 0.151,
+               -0.252,-0.349,-0.441,-0.076, 0.206, 1.000, 0.192, 0.077,
+               -0.229,-0.164,-0.145, 0.023, 0.034, 0.192, 1.000, 0.423,
+                0.058,-0.129,-0.076,-0.131, 0.151, 0.077, 0.423, 1.000), ncol = 8)
+names <- c("rBlood", "Plate", "wBlood", "Neut.", "Lymph", "Bilir.", "Sodium", "Potass.")
+dimnames(blood_corr) <- list(names, names)
+blood_corr
+```
+
+```{r}
+# standard deviations
+sds <- c(0.371, 41.253, 1.935, 0.077, 0.071, 4.037, 2.732, 0.297)
+diag(sds)
+```
+
+\pagebreak
+
+## Table 13.2
+
+```{r}
+# Calculate the covariance matrix from correlations and sds:
+blood_cov <- diag(sds) %*% blood_corr %*% diag(sds)
+dimnames(blood_cov) <- list(names, names)
+round(blood_cov, 2)
+```
+
+```{r}
+# pca based on covariance matrix
+blood_pcacov <- princomp(covmat = blood_cov)
+# summarize the results
+summary(blood_pcacov, loadings = TRUE)
+```
+
+\pagebreak
+
+## Table 13.3
+
+```{r}
+# pca based on correlation matrix
+blood_pcacor <- princomp(covmat = blood_corr)
+summary(blood_pcacor, loadings = TRUE)
+```
+
+\pagebreak
+
+## Figure 13.1
+
+```{r fig13.1, fig.width=7, fig.height=7}
+# scree plots
+par(mfrow = c(2,1))
+plot(1:8, blood_pcacor$sdev^2, type = "l", 
+     xlab = "Component number", 
+     ylab = "Component variance", 
+     main = "Scree Diagram")
+#
+plot(1:8, log(blood_pcacor$sdev^2), type = "l", 
+     xlab = "Component number", 
+     ylab = "log(component variance)", 
+     main = "Log(Eigenvalue) Diagram")
+```
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
