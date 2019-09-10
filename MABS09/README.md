@@ -6,6 +6,6 @@ Response Variables**
 Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 07 September, 2019
 
-**Example**
+**Examples**
  - [Rat weight](Rat_weight.md)
  - [Beat the Blues](BtheB.md)
