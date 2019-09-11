@@ -6,6 +6,11 @@
 
   - [第一章](https://github.com/ChingFanSheu/mvsa/tree/master/Ch01)
 
-- [Multivariate Analysis for the Behavioral Sciences: codes, datasets, examples, exercises, etc.](https://github.com/KimmoVehkalahti/MABS)
+- [Multivariate Analysis for the Behavioral Sciences](https://github.com/KimmoVehkalahti/MABS)
 
+  - [CH08](https://github.com/ChingFanSheu/mvsa/tree/master/MABS08)
+  - [CH09](https://github.com/ChingFanSheu/mvsa/tree/master/MABS09)
+  - [CH10](https://github.com/ChingFanSheu/mvsa/tree/master/MABS10)
+  - [CH13](https://github.com/ChingFanSheu/mvsa/tree/master/MABS13)
+  
 - [An R and S-PLUS Companion to Multivariate Analysis](https://www.york.ac.uk/depts/maths/data/everitt/welcome.htm)
