@@ -12,5 +12,6 @@
   - [Longitudinal Data II](https://github.com/ChingFanSheu/mvsa/tree/master/MABS09)
   - [Longitudinal Data III](https://github.com/ChingFanSheu/mvsa/tree/master/MABS10)
   - [Principal Components Analysis](https://github.com/ChingFanSheu/mvsa/tree/master/MABS13)
+  - [Grouped Multivariate Data](https://github.com/ChingFanSheu/mvsa/tree/master/MABS18)
   
 - [An R and S-PLUS Companion to Multivariate Analysis](https://www.york.ac.uk/depts/maths/data/everitt/welcome.htm)
