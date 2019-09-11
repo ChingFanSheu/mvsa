@@ -1,0 +1,162 @@
+---
+title:  |  
+  |  *Multivariate Analysis for the Behavioral Sciences*
+  |  **Examples of Chapter 18:**
+  |  **Grouped Multivariate Data**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, car, multicon)
+```
+
+
+\pagebreak
+
+## Sudden Infant Death (SID) Syndrome
+
+In an investigation of sudden infant death syndrome ,
+our variables were recorded for each of 16 babies who were 
+victims of SID and for 49 control babies. 
+The babies who died and the control babies all had a gestational
+age of 37 weeks or more. 
+The factor 68 variable arises from a particular aspect of 24h recordings or electrocardiograms and respiratory movements made 
+for each child; the SID victims and the
+controls were matched for age at which these recordings were made. Here, interest lies in deriving a classification rule that could 
+use measurements of the four variables on babies to be able to identify children at risk of SID and, if possible, take appropriate action to prevent the death of the baby.
+
+\pagebreak
+
+# Table 18.2: SIDs Data
+
+```{r}
+fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/sid.csv"
+sid <- read.csv(fLoc)
+```
+
+```{r}
+sid$Group <- as.factor(ifelse(sid$Group==1, "C", "S"))
+glimpse(sid)
+```
+
+```{r}
+knitr::kable(sid[45:54, ])
+```
+
+\pagebreak
+
+## Figure 18.2
+
+```{r fig18.2, out.width='100%', fig.width=6, fig.height=6}
+with(sid, plot(BW, F68, 
+               xlab = "Birth Weight (g)", 
+               ylab = "Factor 68", type = "n"))
+grid()
+with(sid, text(BW, F68, labels = Group, cex = .6))
+#legend("topright", c("Controls", "SID victims"), pch = c("1", "2"))
+```
+
+```{r fig18.2b, fig.width=8, fig.height=8}
+car::scatterplotMatrix(~ F68 + BW | Group, data = sid,
+                       ellipse = TRUE, regLine = FALSE, smooth = FALSE)
+```
+
+
+\pagebreak
+
+## Table 18.3
+
+```{r}
+# Find discriminant function manually using only BW and F68:
+sid1 <- sid[sid$Group == "C", -c(1, 2, 5)]
+sid2 <- sid[sid$Group == "S", -c(1, 2, 5)]
+m1 <- apply(sid1, 2, mean)
+m2 <- apply(sid2, 2, mean)
+S1 <- var(sid1)
+S2 <- var(sid2)
+n1 <- length(sid1[, 1])
+n2 <- length(sid2[, 1])
+S <- ((n1-1)*S1+(n2-1)*S2)/(n1+n2-2)
+a <- solve(S)%*%(m1-m2)
+z1 <- sum(a*m1)
+z2 <- sum(a*m2)
+z <- 0.5*(z1+z2)
+```
+
+```{r}
+# results of the Table briefly (could be more verbose):
+m1; m2
+
+S1; S2
+
+S
+
+a
+
+z1; z2; z
+```
+
+\pagebreak
+
+```{r}
+# (mis)classification table:
+sid_ldf <- MASS::lda(Group ~ BW + F68 + HR + GA, 
+                     data = sid, prior = c(0.5, 0.5))
+table(sid$Group, predict(sid_ldf)$class)
+```
+
+So, the (too optimistic) percentage of misclassifications is $(100\times(8+3)/65) \%$ = `r round(100*(8+3)/65, 1)`%.
+
+\pagebreak
+
+## Figure 18.3
+
+```{r, fig18.3, out.width='100%', fig.width=6, fig.height=6}
+with(sid, plot(BW, F68, 
+               xlab = "Birth Weight (g)", 
+               ylab = "Factor 68", type = "n"))
+with(sid, text(BW, F68, labels = Group, cex = .6))
+slope <- -a[1]/a[2]
+intercept <- z/a[2]
+abline(a=intercept, b=slope, lwd=2)
+#legend("topleft", c("Controls", "SID victims"), pch = c("1", "2"))
+```
+
+\pagebreak
+
+## Reference
+
+Spicer, C.C., Lawrence, C.J., \& Southall, D.P. (1987). 
+Statistical analysis of heart rates and subsequent victims of 
+sudden infant death syndrome.
+*Statistics in Medicine*, 6, 159–166. (Appendix II, p.165) https://doi.org/10.1002/sim.4780060208
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
