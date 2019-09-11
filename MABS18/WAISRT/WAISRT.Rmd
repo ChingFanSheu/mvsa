@@ -1,0 +1,156 @@
+---
+title:  |  
+  |  *Multivariate Analysis for the Behavioral Sciences*
+  |  **Examples of Chapter 18:**
+  |  **Grouped Multivariate Data**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, survey, ICSNP, Hotelling, multicon)
+```
+
+\pagebreak
+
+## Example: Wechsler Adult Intelligence Scale-Revised Test (WAISRT)
+
+Data were collected on 20 male and 20 female right-handed
+Anglo psychology students at a large university in the United States. The
+subjects took three subtests of the Wechsler Adult Intelligence Scale-Revised
+test. The scores recorded were full-scale IQ (FSIQ), 
+verbal IQ (VIQ), and performance IQ (PIQ).
+
+## Table 18.1: WAISRT Scores for Men and Women
+
+```{r}
+fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/iq.csv"
+iq_scores <- read.csv(fLoc)
+```
+
+```{r}
+glimpse(iq_scores)
+head(iq_scores)
+tail(iq_scores)
+```
+
+
+```{r}
+# number of men, number of women, number of variables
+n1 = 20; n2 = 20; q = 3
+# group labels: 20 each
+sex <- as.factor(rep(c('M', 'F'), c(n1, n2)))
+```
+
+```{r}
+# Hotelling's T2 test
+# group mean vectors and covariances
+m1 <- apply(iq_scores[sex=='M', ], 2, mean)
+m2 <- apply(iq_scores[sex=='F', ], 2, mean)
+S1 <- var(iq_scores[sex=='M', ])
+S2 <- var(iq_scores[sex=='F', ])
+# pooled covariance
+S <- ((n1-1)*S1 + (n2-1)*S2) / (n1+n2-2)
+# Hotelling's T-square
+T2 <- t(m1-m2) %*% solve(S) %*% (m1-m2)
+# T-square to F
+F <- (n1+n2-q-1)*T2/((n1+n2-2)*q)
+# F to p-value, one-sided
+pvalue <- 1 - pf(F, q, n1+n2-q-1)
+# output as list
+list(T2=as.numeric(T2), F=as.numeric(F), pvalue=as.numeric(pvalue)) 
+```
+
+Quoting our own text on p.367:
+
+Here, Hotelling's $T^2$ takes the value 
+`r round(T2, digits = 2)`, 
+with the corresponding $F$-statistic being `r round(F, 2)`, 
+having 3 and 36 degrees of freedom; the associated $p$-value is 
+`r round(pvalue, 2)`. 
+There is no evidence of a gender difference on the three measures of IQ.
+
+The following sections do not appear in the textbook.
+
+## HotellingsT2{ICSNP}
+
+```{r}
+Y <- as.matrix(iq_scores[,1:3])
+ICSNP::HotellingsT2(Y ~ sex)
+```
+
+## Data Visualization
+
+```{r fig18.pair, fig.width=5, fig.height=5}
+lattice::splom(~iq_scores[,1:3])
+```
+
+```{r}
+# create gender group ID and subject ID
+# convert from wide to long format
+iq_scores$Gender <- as.factor(sex)
+iq_scores$ID <- as.factor(paste0("S", 101:140))
+iqL <- iq_scores %>% gather(key = iq, value = score, 1:3)
+```
+
+```{r}
+glimpse(iqL)
+```
+
+```{r}
+ggplot(iqL, aes(Gender, score)) +
+ geom_boxplot() +
+ facet_grid(. ~ iq) +
+ labs(x = "Gender", y = "IQ score") +
+ theme_bw()
+```
+
+## Multiple t-tests
+
+```{r}
+lapply(iq_scores[, c("FSIQ", "VIQ", "PIQ")], 
+       function(x) t.test(x ~ iq_scores$Gender, var.equal = TRUE))
+```
+
+```{r fig18.dfp}
+lapply(iq_scores[, c("FSIQ", "VIQ", "PIQ")], 
+       function(x) diffPlot(x ~ iq_scores$Gender, 
+                            ylab = "", xlab = "",
+                            main = "Plot of Means with Floating Axis for Mean Difference"))
+```
+
+\pagebreak
+
+## Reference
+
+Willerman, L., Schultz, R., Rutledge, J.N. \& Bigler, E. D. (1991). 
+In vivo brain size and intelligence. *Intelligence*, 15, 223–228. https://doi.org/10.1016/0160-2896(91)90031-8
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
