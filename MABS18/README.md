@@ -8,5 +8,5 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 **Examples**
  - [Wechsler Adult Intelligence Scale-Revised Test](WAISRT/WAISRT.md)
  - [Sudden Infant Death Syndrome](SIDS/SIDS.md)
- - [Crime Rates](Crime_rate.md)
- - [Drug use](Drug_use.md)
+ - [Risk Taking Behavior](Risk_taking/Risk_taking.md)
+ - [Functional MRI](fMRI/fMRI.md)
