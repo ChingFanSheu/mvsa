@@ -1,0 +1,191 @@
+---
+title:  |  
+  |  *Multivariate Analysis for the Behavioral Sciences*
+  |  **Examples of Chapter 18:**
+  |  **Grouped Multivariate Data**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, car, MVA)
+```
+
+\pagebreak
+
+## Functional Magnetic Resonance Imaging (fMRI) 
+
+Two measures of intensity of each voxel in an image 
+were recorded: PD (Proton Density) and T2 (T2 weighted). 
+One aim of the investigation was to derive a rule for 
+allocating each voxel in an image into one of three classes: 
+grey matter, white matter, or cerebrospinal fluid (CSF). When more than two groups are involved, we can again
+derive classification functions by comparing the assumed multivariate normal densities for each group. 
+
+# Table 18.6: fMRI Data
+
+The textbook uses only 50 observations from a larger data set with
+2,836 observations.
+
+```{r}
+#fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/fMRI.csv"
+#fMRI <- read.csv(fLoc)
+```
+
+```{r}
+temp <- tempfile()
+download.file("http://www.gllamm.org/books/data.zip",temp)
+fMRI <- read.table(unz(temp, "IMAGE.DAT"), header = TRUE)
+unlink(temp)
+```
+
+```{r}
+str(fMRI)
+head(fMRI)
+tail(fMRI)
+```
+
+
+```{r}
+# How many observations in each group
+knitr::kable(with(fMRI, table(Class)))
+```
+
+```{r}
+aggregate(cbind(PD, T2) ~ Class, data =fMRI, FUN = mean);
+aggregate(cbind(PD, T2) ~ Class, data =fMRI, FUN = var)
+```
+
+
+\pagebreak
+
+## Figure 18.6
+
+```{r fig18.6, fig.width=6, fig.height=6}
+with(fMRI, plot(T2 ~ PD, type = "n", pch = Class, 
+     xlab = "PD", ylab = "T2"))
+with(fMRI, text(PD, T2, labels = Class, cex=0.6))
+legend("topleft", c("Grey matter", "White matter", "CSF"), 
+       pch = c("1", "2", "3"))
+```
+
+```{r fig18.6b, fig.width=7, fig.height=7}
+car::scatterplotMatrix(~ T2 + PD | Class, data = fMRI,
+                       ellipse = TRUE, regLine = FALSE, smooth = FALSE)
+```
+
+
+
+\pagebreak
+
+## Table 18.7
+
+```{r}
+Class <- fMRI$Class
+# calculate means of each class
+m1 <- apply(fMRI[Class==1, -3], 2, mean)
+m2 <- apply(fMRI[Class==2, -3], 2, mean)
+m3 <- apply(fMRI[Class==3, -3], 2, mean)
+
+# numbers in each class
+n1 <- length(fMRI[Class==1, 1])
+n2 <- length(fMRI[Class==2, 1])
+n3 <- length(fMRI[Class==3, 1])
+
+# covariance matrices
+S1 <- (n1-1)*var(fMRI[Class==1, -3])/(n1-1)
+S2 <- (n2-1)*var(fMRI[Class==2, -3])/(n2-1)
+S3 <- (n3-1)*var(fMRI[Class==3, -3])/(n3-1)
+
+# pooled covariance matrix
+S123 <- ((n1-1)*var(fMRI[Class==1, -3]) + 
+         (n2-1)*var(fMRI[Class==2, -3]) +
+         (n3-1)*var(fMRI[Class==3,-3])) / (n1+n2+n3-3)
+
+# results briefly:
+m1; m2; m3
+
+c(n1, n2, n3)
+
+S1; S2; S3
+
+S123
+```
+
+\pagebreak
+
+## Table 18.8
+
+```{r}
+# coefficients for each classification class
+invS <- solve(S123)
+a1 <- invS%*%(m1-m2)
+a2 <- invS%*%(m1-m3)
+a3 <- invS%*%(m2-m3)
+
+# thresholds
+z12 <- (m1%*%a1+m2%*%a1)/2
+z13 <- (m1%*%a2+m3%*%a2)/2
+z23 <- (m2%*%a3+m3%*%a3)/2
+
+# results (very) briefly:
+a1; a2; a3
+
+z12; z13; z23
+```
+
+\pagebreak
+
+## Figure 18.7
+
+```{r fig18.7, fig.width=6, fig.height=6}
+# code from previous figure:
+with(fMRI, plot(T2 ~ PD, type = "n", pch = Class, 
+     xlab = "PD", ylab = "T2"))
+with(fMRI, text(PD, T2, labels = Class, cex=0.8))
+legend("topleft", c("Grey matter", "White matter", "CSF"), 
+       pch = c("1", "2", "3"))
+
+# add discriminant functions
+abline(z12/a1[2], -a1[1]/a1[2])
+abline(z13/a2[2], -a2[1]/a2[2], lty=2)
+abline(z23/a3[2], -a3[1]/a3[2], lty=3)
+legend("bottomright", c("Grey/White", "Grey/CSF", "White/CSF"), lty=1:3)
+```
+
+\pagebreak
+
+## Reference
+
+Everitt, B., \& Rabe-Hesketh, S. (2001).
+*Analyzing Medical Data using S-PLUS* 
+Springer.
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
