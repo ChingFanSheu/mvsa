@@ -14,4 +14,3 @@
   - [Principal Components Analysis](https://github.com/ChingFanSheu/mvsa/tree/master/MABS13)
   - [Grouped Multivariate Data](https://github.com/ChingFanSheu/mvsa/tree/master/MABS18)
   
-- [An R and S-PLUS Companion to Multivariate Analysis](https://www.york.ac.uk/depts/maths/data/everitt/welcome.htm)
