@@ -3,13 +3,13 @@
 **Principal Components Analysis**
 ================
 Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
-10 September, 2019
+12 September, 2019
 
 ``` r
 # check to see if the pacman package is there
 # if not install it and then use it manage packages
 if (!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, calibrate)
+pacman::p_load(tidyverse, MVA)
 ```
 
 ## Example: Drug usage
@@ -148,5 +148,11 @@ legend("topright", legend = "Eigenvalue = 1", bty = "n",
 ```
 
 <img src="Drug_use_files/figure-gfm/fig13.7-1.png" style="display: block; margin: auto;" />
+
+## Reference
+
+Everitt, B.S. (2005). *An R and S-PLUS Companion to Multivariate
+Analysis.* Springer. [Data
+files.](https://www.york.ac.uk/depts/maths/data/everitt/welcome.htm)
 
 ## Session information
