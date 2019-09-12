@@ -1,0 +1,129 @@
+---
+title:  |  
+  |  *Multivariate Analysis for the Behavioral Sciences*
+  |  **Grouped Multivariate Data**
+author: |
+  | Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
+  |
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# check to see if the pacman package is there
+# if not install it and then use it manage packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, car, MVN)
+```
+
+\pagebreak
+
+## Risk Taking Behavior
+
+Students were randomly assigned to three different direction treatments
+known as Arnold and Arnold (AA), Coombs (C), and Coombs with
+no penalty (NC) in the direction. Using the three treatment conditions, students
+were administered two parallel forms of a test given under low and high
+penalty. The question of interest here
+is whether the two-dimensional population mean vectors for the three groups
+are the same.
+
+\pagebreak
+
+## Table 18.4: Data from Risk Taking Behavior Study
+
+```{r}
+fLoc <- "https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/Timm.csv"
+dta <- read.csv(fLoc)
+```
+
+```{r}
+str(dta)
+head(dta, n = 10)
+tail(dta, n = 10)
+```
+
+```{r}
+aggregate(cbind(Low, High) ~ Group, data = dta, FUN = mean)
+aggregate(cbind(Low, High) ~ Group, data = dta, FUN = var)
+```
+
+
+\pagebreak
+
+## Figure 18.4
+
+```{r fig18.4, fig.width=6, fig.height=6}
+par(mfrow=c(2,1))
+treatments <- c("AA", "C", "NC")
+ylim <- c(0, 80)
+with(dta, {
+boxplot(Low[Group==1], Low[Group==2], Low[Group==3], 
+        names = treatments, ylab = "'Low' score",  ylim = ylim)
+  boxplot(High[Group==1], High[Group==2], High[Group==3], 
+        names = treatments, ylab = "'High' score", ylim = ylim)
+})
+```
+
+\pagebreak
+
+```{r fig18.4b, fig.width=7, fig.height=7}
+car::scatterplotMatrix(~ Low + High | Group, data = dta,
+                       ellipse = TRUE, regLine = FALSE, smooth = FALSE)
+```
+
+
+\pagebreak
+
+## Table 18.5
+
+```{r}
+dta_maov <- manova(cbind(Low, High) ~ Group, data = dta)
+summary(dta_maov, test = "Pillai")
+summary(dta_maov, test = "Wilks")
+summary(dta_maov, test = "Hotelling")
+summary(dta_maov, test = "Roy")
+```
+
+\pagebreak
+
+## Figure 18.5
+
+```{r fig18.5, fig.width=5, fig.height=5}
+MVN::mvn(residuals(dta_maov), multivariatePlot = "qq")
+```
+
+\pagebreak
+
+## References
+
+Korkmaz, S., Goksuluk, D., \& Zararsiz, G. (2014). 
+MVN: An R Package for Assessing Multivariate Normality. 
+*The R Journal*. 6(2), 151-162.
+[Webpage](http://www.biosoft.hacettepe.edu.tr/MVN/)
+
+Timm, N.H. (2002). *Applied Multivariate Analysis*. 
+Springer, New York. https://doi.org/10.1007/b98963
+
+\pagebreak
+
+## Session information
+
+```{r session_info, include=FALSE}
+# set include=TRUE to view the results
+sessionInfo()
+```
