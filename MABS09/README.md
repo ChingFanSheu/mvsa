@@ -9,3 +9,6 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
 **Examples**
  - [Rat weight](Rat_weight.md)
  - [Beat the Blues](BtheB.md)
+
+**Exercises**
+ - [Problems](Exercises_09.md)
