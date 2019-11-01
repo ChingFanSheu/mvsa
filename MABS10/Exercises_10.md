@@ -12,11 +12,15 @@ pacman::p_load(gee, lme4, tidyverse)
 
 ## Problem 1
 
-For a poll of a random sample of 1,600 voting-age British citizens, 944
-indicated approval of the Prime Minister’s performance in office. Six
-months later, of these same 1,600 people, 880 indicated approval. Four
-different models are used to account for the data set with the R codes
-given below. Explain the similaries and differences in the output.
+For a poll of a random sample of 1,600 voting-age British citizens, 794
+indicated approval of the Prime Minister’s performance in office for the
+first and the follow-up survey six months later. Of these same 1,600
+people, 150 indicated approval in the first survey but disapproval in
+the second; 86 people indicated disapproval first then approval later;
+570 people indicated disapproval both times. Four different models are
+used to account for the data set with the R codes given below. Identify
+and explain the similarities and differences in the output for each of
+the four different models.
 
 ``` r
 # construct the data set
@@ -213,13 +217,13 @@ summary(glmer(Resp ~ as.factor(Time) + (1 | ID), data = dta, family="binomial"))
 ## Problem 2
 
 The Law School Admission Test (LSAT) consists of a number of dichotomous
-items, which can be answered correctly or incorrecty. These items are
+items, which can be answered correctly or incorrectly. These items are
 constructed so that a person who scores high on the test is more likely
 to do well in a law school. The data set here contains answers by 1,000
 persons to 5 test items.
 
-The dataset is available as a data frame object *LSAT* in the R package
-*ltm*. Fit the Rasch model to the dataset.
+The data set is available as a data frame object *LSAT* in the R package
+*ltm*. Fit the Rasch model to the data set.
 
 ``` r
 # install and load package assuming pacman package is available
@@ -368,7 +372,7 @@ Wiley.
 
 Atkins, D.C., Baldwin, S.A., Zheng, C., Gallop, R.J., & Neighbors, C.
 (2013). A tutorial on count regression and zero-altered count models for
-longitudinal substance use data. *Psycholology of Addictive Behavior*.
+longitudinal substance use data. *Psychology of Addictive Behavior*.
 27(1), 166-177.
 
 Bock, R., & Lieberman, M. (1970). Fitting a response model for n
