@@ -13,5 +13,5 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
  
 **Problems**
 
- - [Beat the Blues Revisited](BtB.md)
+ - [Exercises](Exercises_10.md)
  
