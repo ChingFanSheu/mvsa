@@ -10,3 +10,6 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
  - [Head Size](Head_size.md)
  - [Crime Rates](Crime_rate.md)
  - [Drug use](Drug_use.md)
+
+**Exercises**
+ - [Problems](Exercises_13.md)
