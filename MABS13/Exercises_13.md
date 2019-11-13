@@ -57,7 +57,7 @@ are designed to measure the following attributes: (1) Intelligence (2)
 Form Relations (3) Dynamometer (4) Dotting (5) Sensory Motor
 Coordination (6) Perservation
 
-Could a principal component analysis of the data provide useful summary
+Could a principal component analysis of the data provide a useful summary
 of attributes for either engineer apprentices or pilots or both?
 
 ``` r
@@ -135,7 +135,7 @@ from the 1995 issue of US News and World Report. Perform a principal
 component analysis on the data and use the results to summarize how
 private and public colleges differ based on a few components. Redefining
 some of the variables before performing the principal component analysis
-migt improve the results.
+might improve the results.
 
 ``` r
 if (!require("pacman")) install.packages("pacman")
