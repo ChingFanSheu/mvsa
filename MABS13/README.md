@@ -11,5 +11,5 @@ Kimmo Vehkalahti, Brian S. Everitt; edited by C.-F. Sheu
  - [Crime Rates](Crime_rate.md)
  - [Drug use](Drug_use.md)
 
-**Exercises**
- - [Problems](Exercises_13.md)
+**Problems**
+ - [Exercises](Exercises_13.md)
