@@ -1,0 +1,156 @@
+---
+title:  |  
+  | **Exercises: Principal Components Analysis** 
+author: "C.-P. Cheng and C.-F. Sheu"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  rmarkdown::github_document:
+  pdf_document:
+    latex_engine: xelatex
+    number_sections: no
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  fig.align = 'center',
+  comment = "",
+  tidy = FALSE,     # display code as typed
+  size = "small")   # slightly smaller font for code)
+```
+
+# Exercises
+
+## Problem 1
+
+Four hundred and eighty seniors were tested on three mental ability measures 
+and three educational motivation sub-scales. It is of interest to find out whether the resulting variability in the 480 by 6 observed data matrix (standardized) could be reduced to a few principal components. 
+Suppressing of any component weights that are lower than .20, how would you interpret the first two principal components?
+
+```{r, message=FALSE,warning=FALSE}
+# get a data set from a zip file over the Internet
+temp <- tempfile()
+download.file("http://s3-euw1-ap-pe-ws4-cws-documents.ri-prod.s3.amazonaws.com/9780805863758/Data_TF.zip", temp)
+dta <- read.table(unz(temp, "Data Files/ch7ex2.dat"), h = TRUE)
+unlink(temp)
+```
+
+```{r}
+names(dta) <- c("Ab1", "Ab2", "Ab3", "EM1","EM2", "EM3")
+```
+
+```{r}
+head(dta); tail(dta)
+```
+
+\pagebreak
+
+## Problem 2
+
+A data set contains estimates of the percentage of body fat determined by underwater weighing and various body circumference measurements for 252 men.
+Detailed description of the data set is found
+[here](http://staff.pubhealth.ku.dk/~tag/Teaching/share/data/Bodyfat.html).
+
+A principal component analysis of the body fat data set is conducted with the
+R code segments below. Interpret the results.
+
+```{r, message=FALSE,warning=FALSE}
+# input data
+dta <- read.csv("http://staff.pubhealth.ku.dk/~tag/Teaching/share/data/Bodyfat.csv")
+```
+
+```{r}
+head(dta)
+```
+
+The Body Mass Index (BMI) is calculated from variables height and weight.
+
+```{r}
+# Compute the BMI index from height and weight
+dta$BMI <- 703*(dta$Weight/dta$Height^2)
+```
+
+Four categories (groups) are created according to the BMI.
+
+```{r}
+dta$Group <- cut(dta$BMI, breaks = c(0, 18.5, 25, 30, Inf), 
+                 labels = c("Underweight", "Normal", "Overweight", "Obese"))
+```
+
+
+```{r, echo=TRUE, message=FALSE,warning=FALSE}
+str(dta)
+```
+
+```{r}
+res_pc <- princomp(dta[,-c(1:5, 16:17)], cor = TRUE)
+```
+
+```{r, message=FALSE,warning=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(ggfortify, tidyverse)
+```
+
+```{r}
+autoplot(res_pc, data = dta, loadings = TRUE, colour ='Group',
+         loadings.label = TRUE, 
+         loadings.colour = 'peru',
+         loadings.label.colour = 'peru',
+         loadings.label.size = 4,
+         loadings.label.repel=T) + 
+  ggtitle("Body fat measurements") + 
+  theme_bw()
+```
+
+```{r}
+# show weights on variables
+loadings(res_pc)
+```
+
+
+\pagebreak
+
+## Problem 3
+
+*College* is the name of a data frame in the R package *ISLR*. It contains 
+777 observations on 18 variables for a sample of US colleges 
+from the 1995 issue of US News and World Report.
+Perform a principal component analysis on the data and use the results to
+summarize how private and public colleges differ based on a few components.
+Redefining some of the variables before performing the principal
+component analysis might improve the results.
+
+```{r, echo=TRUE, message=FALSE,warning=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(ISLR)
+```
+
+```{r}
+data(College)
+?College
+```
+
+```{r}
+# make a copy of the data frame for subsequent analysis
+dta <- College
+```
+
+```{r}
+# the data are readily in the long form:
+head(dta, n = 9); tail(dta, n = 9)
+```
+
+## References
+
+James, G., Witten, D., Hastie, T., \& Tibshirani, R. (2013) 
+*An Introduction to Statistical Learning with applications in R*.
+Springer-Verlag.
+
+Raykov, T., \& George A. Marcoulides, G.A. (2008).
+*An Introduction to Applied Multivariate Analysis*
+Routledge.
+
+Rencher, A., \& Christensen, W.F. (2012).
+*Methods of Multivariate Analysis*. 3rd Ed.
+Wiley.
