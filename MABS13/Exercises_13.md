@@ -1,14 +1,14 @@
 **Exercises: Principal Components Analysis**
 ================
 C.-P. Cheng and C.-F. Sheu
-13 November, 2019
+14 November, 2019
 
 # Exercises
 
 ## Problem 1
 
 Four hundred and eighty seniors were tested on three mental ability
-measures and three educational motivation subscales. It is of interest
+measures and three educational motivation sub-scales. It is of interest
 to find out whether the resulting variability in the 480 by 6 observed
 data matrix (standardized) could be reduced to a few principal
 components. Suppressing of any component weights that are lower than
@@ -52,79 +52,139 @@ head(dta); tail(dta)
 
 ## Problem 2
 
-Twenty engineer apprentices and twenty pilots were given six tests that
-are designed to measure the following attributes: (1) Intelligence (2)
-Form Relations (3) Dynamometer (4) Dotting (5) Sensory Motor
-Coordination (6) Perservation
+A data set contains estimates of the percentage of body fat determined
+by underwater weighing and various body circumference measurements for
+252 men. Detailed description of the data set is found
+[here](http://staff.pubhealth.ku.dk/~tag/Teaching/share/data/Bodyfat.html).
 
-Could a principal component analysis of the data provide a useful summary
-of attributes for either engineer apprentices or pilots or both?
+A principal component analysis of the body fat data set is conducted
+with the R code segments below. Interpret the results.
 
 ``` r
-temp <- tempfile()
-fLoc <- "ftp://ftp.wiley.com/public/sci_tech_med/multivariate_analysis_3e/multivariate_analysis - 3rd Ed.zip"
-download.file(url=fLoc, destfile = temp)
+# input data
+dta <- read.csv("http://staff.pubhealth.ku.dk/~tag/Teaching/share/data/Bodyfat.csv")
 ```
 
 ``` r
-dta <- read.table(unz(temp, "multivariate_analysis - 3rd Ed/T5_6_PILOT.DAT"), col.names =  c('Group', 'Intelligence', 'FormRelations', 'Dynamometer', 'Dotting', 'SensoryMotorCoordination', 'Perservation'))
-unlink(temp)
-```
-
-``` r
-dta$Group <- factor(ifelse(dta$Group == 1, 'Apprentice', 'Pilot'))
-```
-
-``` r
-# show top and bottom 9 lines of data frame
-# the data are readily in the long form:
-head(dta, n = 9); tail(dta, n = 9)
+head(dta)
 ```
 
 ``` 
-       Group Intelligence FormRelations Dynamometer Dotting
-1 Apprentice          121            22          74     223
-2 Apprentice          108            30          80     175
-3 Apprentice          122            49          87     266
-4 Apprentice           77            37          66     178
-5 Apprentice          140            35          71     175
-6 Apprentice          108            37          57     241
-7 Apprentice          124            39          52     194
-8 Apprentice          130            34          89     200
-9 Apprentice          149            55          91     198
-  SensoryMotorCoordination Perservation
-1                       54          254
-2                       40          300
-3                       41          223
-4                       80          209
-5                       38          261
-6                       59          245
-7                       72          242
-8                       85          242
-9                       50          277
+  Density bodyfat Age Weight Height Neck Chest Abdomen   Hip Thigh Knee
+1  1.0708    12.3  23 154.25  67.75 36.2  93.1    85.2  94.5  59.0 37.3
+2  1.0853     6.1  22 173.25  72.25 38.5  93.6    83.0  98.7  58.7 37.3
+3  1.0414    25.3  22 154.00  66.25 34.0  95.8    87.9  99.2  59.6 38.9
+4  1.0751    10.4  26 184.75  72.25 37.4 101.8    86.4 101.2  60.1 37.3
+5  1.0340    28.7  24 184.25  71.25 34.4  97.3   100.0 101.9  63.2 42.2
+6  1.0502    20.9  24 210.25  74.75 39.0 104.5    94.4 107.8  66.0 42.0
+  Ankle Biceps Forearm Wrist
+1  21.9   32.0    27.4  17.1
+2  23.4   30.5    28.9  18.2
+3  24.0   28.8    25.2  16.6
+4  22.8   32.4    29.4  18.2
+5  24.0   32.2    27.7  17.7
+6  25.6   35.7    30.6  18.8
+```
+
+The Body Mass Index (BMI) is calculated from variables height and
+weight.
+
+``` r
+# Compute the BMI index from height and weight
+dta$BMI <- 703*(dta$Weight/dta$Height^2)
+```
+
+Four categories (groups) are created according to the BMI.
+
+``` r
+dta$Group <- cut(dta$BMI, breaks = c(0, 18.5, 25, 30, Inf), 
+                 labels = c("Underweight", "Normal", "Overweight", "Obese"))
+```
+
+``` r
+str(dta)
+```
+
+    'data.frame':   252 obs. of  17 variables:
+     $ Density: num  1.07 1.09 1.04 1.08 1.03 ...
+     $ bodyfat: num  12.3 6.1 25.3 10.4 28.7 20.9 19.2 12.4 4.1 11.7 ...
+     $ Age    : int  23 22 22 26 24 24 26 25 25 23 ...
+     $ Weight : num  154 173 154 185 184 ...
+     $ Height : num  67.8 72.2 66.2 72.2 71.2 ...
+     $ Neck   : num  36.2 38.5 34 37.4 34.4 39 36.4 37.8 38.1 42.1 ...
+     $ Chest  : num  93.1 93.6 95.8 101.8 97.3 ...
+     $ Abdomen: num  85.2 83 87.9 86.4 100 94.4 90.7 88.5 82.5 88.6 ...
+     $ Hip    : num  94.5 98.7 99.2 101.2 101.9 ...
+     $ Thigh  : num  59 58.7 59.6 60.1 63.2 66 58.4 60 62.9 63.1 ...
+     $ Knee   : num  37.3 37.3 38.9 37.3 42.2 42 38.3 39.4 38.3 41.7 ...
+     $ Ankle  : num  21.9 23.4 24 22.8 24 25.6 22.9 23.2 23.8 25 ...
+     $ Biceps : num  32 30.5 28.8 32.4 32.2 35.7 31.9 30.5 35.9 35.6 ...
+     $ Forearm: num  27.4 28.9 25.2 29.4 27.7 30.6 27.8 29 31.1 30 ...
+     $ Wrist  : num  17.1 18.2 16.6 18.2 17.7 18.8 17.7 18.8 18.2 19.2 ...
+     $ BMI    : num  23.6 23.3 24.7 24.9 25.5 ...
+     $ Group  : Factor w/ 4 levels "Underweight",..: 2 2 2 2 3 3 3 2 2 3 ...
+
+``` r
+res_pc <- princomp(dta[,-c(1:5, 16:17)], cor = TRUE)
+```
+
+``` r
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(ggfortify, tidyverse)
+```
+
+``` r
+autoplot(res_pc, data = dta, loadings = TRUE, colour ='Group',
+         loadings.label = TRUE, 
+         loadings.colour = 'peru',
+         loadings.label.colour = 'peru',
+         loadings.label.size = 4,
+         loadings.label.repel=T) + 
+  ggtitle("Body fat measurements") + 
+  theme_bw()
+```
+
+<img src="Exercises_13_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+
+``` r
+# show weights on variables
+loadings(res_pc)
 ```
 
 ``` 
-   Group Intelligence FormRelations Dynamometer Dotting
-32 Pilot          135            41          83     216
-33 Pilot          100            35          83     183
-34 Pilot          149            37          94     227
-35 Pilot          149            38          78     258
-36 Pilot          153            27          89     283
-37 Pilot          136            31          83     257
-38 Pilot           97            36         100     252
-39 Pilot          141            37         105     250
-40 Pilot          164            32          76     187
-   SensoryMotorCoordination Perservation
-32                       39          306
-33                       57          242
-34                       30          240
-35                       42          271
-36                       66          291
-37                       31          311
-38                       30          225
-39                       27          243
-40                       30          264
+
+Loadings:
+        Comp.1 Comp.2 Comp.3 Comp.4 Comp.5 Comp.6 Comp.7 Comp.8 Comp.9
+Neck     0.327         0.259  0.339         0.288  0.719  0.318       
+Chest    0.339  0.273         0.243 -0.447        -0.235  0.127 -0.543
+Abdomen  0.334  0.398         0.216 -0.310 -0.147 -0.134         0.303
+Hip      0.348  0.255 -0.210 -0.119                      -0.349  0.551
+Thigh    0.333  0.191 -0.180 -0.411  0.255  0.105  0.289 -0.404 -0.524
+Knee     0.329        -0.273 -0.135  0.446 -0.442 -0.118  0.624       
+Ankle    0.247 -0.625 -0.583        -0.416  0.168                     
+Biceps   0.322         0.256 -0.304         0.671 -0.471  0.197  0.130
+Forearm  0.270 -0.363  0.590 -0.404 -0.262 -0.440                     
+Wrist    0.299 -0.377  0.141  0.568  0.429        -0.271 -0.396       
+        Comp.10
+Neck           
+Chest    0.419 
+Abdomen -0.669 
+Hip      0.563 
+Thigh   -0.234 
+Knee           
+Ankle          
+Biceps         
+Forearm        
+Wrist          
+
+               Comp.1 Comp.2 Comp.3 Comp.4 Comp.5 Comp.6 Comp.7 Comp.8
+SS loadings       1.0    1.0    1.0    1.0    1.0    1.0    1.0    1.0
+Proportion Var    0.1    0.1    0.1    0.1    0.1    0.1    0.1    0.1
+Cumulative Var    0.1    0.2    0.3    0.4    0.5    0.6    0.7    0.8
+               Comp.9 Comp.10
+SS loadings       1.0     1.0
+Proportion Var    0.1     0.1
+Cumulative Var    0.9     1.0
 ```
 
 ## Problem 3
