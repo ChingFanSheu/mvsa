@@ -144,7 +144,7 @@ autoplot(res_pc, data = dta, loadings = TRUE, colour ='Group',
   theme_bw()
 ```
 
-<img src="./Exercises_13_files/figure-gfm/fig.bf-1.png" style="display: block; margin: auto;" />
+<img src="Exercises_13_files/figure-gfm/fig.bf-1.png" style="display: block; margin: auto;" />
 
 ``` r
 # show weights on variables
