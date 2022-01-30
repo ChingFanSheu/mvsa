@@ -2,7 +2,7 @@
 
 - [Fall 2019](calendar.md)
 
-- [R在行為科學之應用](http://myweb.ncku.edu.tw/~cpcheng/Rbook/index.htm)
+- [R在行為科學之應用](https://cpcheng.neocities.org/Rbook/index.htm)
 
   - [第一章: 資料檢視](https://github.com/ChingFanSheu/mvsa/tree/master/Ch01)
 
