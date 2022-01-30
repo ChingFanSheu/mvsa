@@ -20,7 +20,7 @@ getwd()
 
 ``` r
 #檔案地址
-fLoc <- "http://myweb.ncku.edu.tw/~cpcheng/Rbook/01/data/Quality_of_Life.txt"
+fLoc <- "https://cpcheng.neocities.org/Rbook/01/data/Quality_of_Life.txt"
 ```
 
 ``` r
